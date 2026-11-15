@@ -342,6 +342,7 @@ var turn = 0;
 var enemyHP = 0;
 var enemyMax = 0;
 var playerATK = 0;
+var shield = 0;
 
 document.addEventListener("keydown", function (event) {
 	if (gamestate == 0) {
@@ -386,6 +387,7 @@ function beginGame() {
 	gamestate = 0;
 	cards.length = 0;
 	turn = 0;
+	shield = 0;
 	enemyATK = 0;
 	cards.push(0);
 	cards.push(1);
@@ -728,18 +730,23 @@ function playerTurn() {
 	} else if (playerATK == 1) {
 		updateBlood(health - 1);
 	} else if (playerATK == 2) {
-		
+		shield += 3;
 	}
 	setTimeout(enemyTurn, 2000);
 }
 function enemyTurn() {
 	turn += 0.25;
 	if (enemy == 1) {
+		var damage;
 		if (enemyATK == 0) {
-			updateBlood(health - 5);
+			damage = 5;
 		} else if (enemyATK == 2) {
-			updateBlood(health - 2);
+			damage = 2;
 		}
+		shield -= damage;
+		damage = Math.max(Math.abs(shield), damage);
+		shield = Math.max(shield, 0);
+		updateBlood(health - damage);
 	}
 	setTimeout(function () {
 		turn += 0.5;
