@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+:root {
+	--borders: #fff;
+	--bg: #000;
+	--blood: #f00;
+	--currentblood: 100%;
+	--newblood: 100%;
+	--playerx: 0px;
+	--playery: 0px;
+	--dirx: 0px;
+	--diry: 0px;
+	-currenteblood: 100%;
+	neweblood: 100%;
+}
+html, body {
+	background-color: var(--bg);
+	height: 100%;
+	overflow: hidden;
+}
+#game-box {
+	position: absolute;
+	top: calc(50% - 15em + 1px);
+	left: calc(50% - 15em + 1px);
+	width: calc(30em + 2px);
+	height: calc(30em + 2px);
+	border: 1px var(--borders) solid;
+	background-color: var(--bg);
+	overflow: hidden;
+}
+#game-title-box {
+	position: absolute; 
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	border: 0px var(--borders) solid;
+	flex-flow: column nowrap;
+	justify-content: space-around;
+	align-items: center;
+	font-family: monospace;
+}
+#game-title {
+	font-size: 2em;
+	color: var(--borders);
+}
+#game-title-start {
+	border: 1px var(--borders) solid;
+	font-family: monospace;
+	font-size: 1.5em;
+	color: var(--borders);
+	background-color: var(--bg);
+	padding: 0.5em;
+}
+#game-title-start:hover {
+	background-color: var(--borders);
+	color: var(--bg);
+}
+#blood-meter {
+	border: 2px var(--borders) dotted;
+	position: absolute;
+	top: 5%;
+	left: 90%;
+	width: 5%;
+	height: 90%;
+	background-color: var(--bg);
+}
+#blood-meter-num {
+	position: absolute;
+	top: 5%;
+	left: 95%;
+	width: 5%;
+	height: 90%;
+	font-family: monospace;
+	font-size: 1em;
+	text-align: center;
+	color: var(--borders);
+}
+#blood-meter-bar {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 0%;
+	background-color: var(--blood);
+}
+.arrows {
+	
+}
+#game-grid {
+	display: grid;
+	position: absolute;
+	top: 1em;
+	left: 1em;
+	width: 28em;
+	height: 28em;
+	grid-template-columns: repeat(8, 9%);
+	grid-template-rows: repeat(9, 9%);
+	column-gap: 0.6666em;
+	row-gap: 0.6666em;
+}
+.grid-square {
+	font-family: monospace;
+	font-size: 1.5em;
+	border: 2px var(--borders) solid;
+	background-color: var(--bg);
+	color: var(--borders);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.grid-none {
+	opacity: 0;
+}
+#player {
+	position: absolute;
+	width: 2em;
+	height: 2em;
+	border-radius: 100%;
+	background-color: var(--bg);
+	border: 2px var(--borders) solid;
+}
+#battle-ui {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	transform: translate(30em, 0em);
+}
+#enemy1 {
+	position: absolute;
+	width: 10em;
+	height: 10em;
+	background-color: var(--bg);
+	border: 2px var(--borders) solid;
+	top: calc(50% - 7em);
+	left: calc(50% - 5em);
+}
+#attack-indicator {
+	position: absolute;
+	top: 0.5em;
+	left: 0.5em;
+	border: 1px var(--borders) solid;
+	font-family: monospace;
+	padding: 0.5em;
+	font-size: 1.5em;
+	color: var(--borders);
+}
+.card {
+	position: absolute;
+	width: 7.5em;
+	height: 10em;
+	border: 1px var(--borders) solid;
+	border-radius: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-family: monospace;
+	top: 4em;
+	background-color: var(--bg);
+	color: var(--borders);
+	font-size: 1.5em;
+}
+#enemy-blood-meter {
+	border: 2px var(--borders) dotted;
+	position: absolute;
+	top: 5em;
+	left: 1.5em;
+	width: 1.5em;
+	height: calc(90% - 3.5em);
+	background-color: var(--bg);
+}
+#enemy-blood-meter-num {
+	position: absolute;
+	top: 5.5em;
+	left: 2px;
+	width: 1.5em;
+	height: calc(90% - 3.5em);
+	font-family: monospace;
+	font-size: 1em;
+	text-align: center;
+	color: var(--borders);
+}
+#enemy-blood-meter-bar {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 0%;
+	background-color: var(--borders);
+}
+#card-holder {
+	position: absolute;
+	top: 50%;
+	left: 0px;
+	width: 100%;
+	height: 50%;
+}
+#skip-button {
+	position: absolute;
+	bottom: 0.5em;
+	right: 0.5em;
+	font-size: 1.5em;
+	padding: 0.5em;
+	background-color: var(--bg);
+	border: 1px var(--borders) solid;
+	color: var(--borders);
+	font-family: monospace;
+}
+#skip-button:hover {
+	background-color: var(--borders);
+	color: var(--bg);
+}
+@keyframes appear {
+	from {opacity: 0;}
+	to   {opacity: 1;}
+}
+@keyframes bloodMove {
+	from {height: var(--currentblood);}
+	to   {height: var(--newblood);}
+}
+@keyframes playerMove {
+	from {top: var(--playery); left: var(--playerx);}
+	to   {top var(--diry); left: var(--dirx);}
+}
+@keyframes playerOtherMove {
+	from {top: var(--playery); left: var(--playerx);}
+	to   {top var(--diry); left: var(--dirx);}
+}
+@keyframes poison {
+	from {border: 2px var(--borders) dotted; background-color: var(--borders); color: var(--bg);}
+	to   {border: 2px var(--borders) dotted; background-color: var(--bg); color: var(--borders);}
+}
+@keyframes UIOut { 
+	from {transform: translate(0px, 0px);}
+	to   {transform: translate(-30em, 0px);}
+}
+@keyframes UIOut2 {
+	from {transform: translate(30em, 0px);}
+	to   {transform: translate(0px, 0px);}
+}
+@keyframes enemy1Idle {
+	0%   {transform: rotate(45deg);}
+	50%  {transform: rotate(495deg);}
+	100% {transform: rotate(315deg);}
+}
+@keyframes enemyBloodMove {
+	from {height: var(--currenteblood);}
+	to   {height: var(--neweblood);}
+}
+@keyframes draw {
+	from {transform: translate(-60em, 0px);}
+	to   {transform: translate(0em, 0px);}
+}
+@keyframes useCard {
+	from {transform: translate(0em, 0em);}
+	to   {transform: translate(0em, -50em);}
+}
+@keyframes shiftBack {
+	from {transform: translate(0em, 0em);}
+	to   {transform: translate(2em, 0em);}
+}
+</style>
+</head>
+<body>
+
+<div id="game-box">
+
+<div id="game-title-box" style="display: flex">
+<div id="game-title">title</div>
+<button type="button"id="game-title-start"onclick="beginGame()">Begin!!</button>
+</div>
+
+<div id="game-ui" style="display: none; opacity: 0;">
+
+<div id="blood-meter"><div id="blood-meter-bar"></div></div>
+<div id="blood-meter-num">0<br>/<br>10</div>
+
+<div id="overworld">
+<div id="game-grid"></div>
+<div id="player"></div>
+</div>
+<div id="battle-ui">
+<div id="attack-indicator"></div>
+<div id="enemy-holder"></div>
+
+<div id="enemy-blood-meter"><div id="enemy-blood-meter-bar"></div></div>
+<div id="enemy-blood-meter-num">0<br>/<br>10</div>
+
+<div id="card-holder"></div>
+<div id="skip-button">Skip</div>
+</div>
+
+</div>
+
+</div>
+
+</body>
+<script>
+const gameBox = document.getElementById("game-box");
+const titleBox = document.getElementById("game-title-box");
+const gameUI = document.getElementById("game-ui");
+const r = document.querySelector(":root");
+const bloodNum = document.getElementById("blood-meter-num");
+const bloodBar = document.getElementById("blood-meter-bar");
+const enemyBloodNum = document.getElementById("enemy-blood-meter-num");
+const enemyBloodBar = document.getElementById("enemy-blood-meter-bar");
+const gameGrid = document.getElementById("game-grid");
+const player = document.getElementById("player");
+const overworld = document.getElementById("overworld");
+const battleUI = document.getElementById("battle-ui");
+const enemyHolder = document.getElementById("enemy-holder");
+const attackInd = document.getElementById("attack-indicator");
+const cardHolder = document.getElementById("card-holder");
+
+const cardKey = [
+	"○ +2",
+	"○ -1",
+	"○ +3∇",
+	"",
+	""
+];
+
+var health = 0;
+var max = 10;
+var moves = 0;
+var gamestate = 0;
+var enemy = 0;
+var floor = 0;
+const cards = [];
+const grid = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), 
+			  new Array(8), new Array(8), new Array(8)];
+const position = [0, 0];
+const deck = [];
+const discard = [];
+var turn = 0;
+var enemyHP = 0;
+var enemyMax = 0;
+var playerATK = 0;
+
+document.addEventListener("keydown", function (event) {
+	if (gamestate == 0) {
+		if (event.key.length >= 7) {
+			if (event.key.slice(5) == "Up") {
+				updatePos(0);
+			} else if (event.key.slice(5) == "Right") {
+				updatePos(1);
+			} else if (event.key.slice(5) == "Down") {
+				updatePos(2);
+			} else if (event.key.slice(5) == "Left") {
+				updatePos(3);
+			}
+		} else {
+			if (event.key == "Up") {
+				updatePos(0);
+			} else if (event.key == "Right") {
+				updatePos(1);
+			} else if (event.key == "Down") {
+				updatePos(2);
+			} else if (event.key == "Left") {
+				updatePos(3);
+			}
+		}
+		gridCheck();
+	}
+});
+document.getElementById("skip-button").addEventListener("click", function () {
+	turn += 0.25;
+	playerATK = -1;
+	playerTurn();
+});
+function beginGame() {
+	titleBox.style.animation = "appear 1s reverse both";
+	health = 0;
+	max = 10;
+	moves = 0;
+	position[0] = 0;
+	position[1] = 0;
+	floor = 0;
+	enemy = 0;
+	gamestate = 0;
+	cards.length = 0;
+	turn = 0;
+	enemyATK = 0;
+	cards.push(0);
+	cards.push(1);
+	cards.push(2);
+	for (let i = 0; i < (grid.length * grid[0].length); i++) {
+		gameGrid.innerHTML += '<div class="grid-none" id="grid-' + i + '"></div>';
+		grid[numToPos(i)[1]][numToPos(i)[0]] = "0";
+		document.getElementById("grid-" + i).innerHTML = "0";
+	}
+	setTimeout(function () {
+		updatePos();
+		titleBox.style.display = "none";
+		gameUI.style.display = "block";
+		gameUI.style.animation = "appear 1s both";
+		setTimeout(function () {
+			updateBlood(10);
+		}, 1500);
+		setTimeout(function () {
+			updatePos();
+			generateGrid();
+			updateGrid();
+		}, 3500);
+	}, 1000);
+}
+
+function updateBlood(newhealth = health, newmax = max) {
+	let healthCounter = health;
+	let maxCounter = max;
+	let loop = setInterval(function () {
+		if (newhealth < healthCounter) {
+			healthCounter--;
+		} else if (newhealth > healthCounter) {
+			healthCounter++;
+		}
+		if (newmax < maxCounter) {
+			maxCounter--;
+		} else if (newmax > maxCounter) {
+			maxCounter++;
+		}
+		bloodNum.innerHTML = healthCounter + "<br>/<br>" + maxCounter;
+		if (newhealth == healthCounter && newmax == maxCounter) {
+			health = newhealth;
+			max = newmax;
+			clearInterval(loop);
+		} 
+	}, 1000 / Math.max(Math.abs(health - newhealth), Math.abs(max - newmax)));
+	r.style.setProperty("--currentblood", Math.min((health / max * 100), 100) + "%");
+	r.style.setProperty("--newblood", Math.min((newhealth / newmax * 100), 100) + "%");
+	bloodBar.style.height = Math.min((health / max * 100), 100) + "%";
+	bloodBar.style.animation = "";
+	setTimeout(function () {
+		bloodBar.style.animation = "bloodMove 1s both";
+	}, 1);
+	if (newhealth == 0) {
+		setTimeout(revive, 1000);
+	}
+}
+function updateEnemyBlood(newhealth = enemyHP, newmax = enemyMax) {
+	let healthCounter = enemyHP;
+	let maxCounter = enemyMax;
+	let loop = setInterval(function () {
+		if (newhealth < healthCounter) {
+			healthCounter--;
+		} else if (newhealth > healthCounter) {
+			healthCounter++;
+		}
+		if (newmax < maxCounter) {
+			maxCounter--;
+		} else if (newmax > maxCounter) {
+			maxCounter++;
+		}
+		enemyBloodNum.innerHTML = healthCounter + "<br>/<br>" + maxCounter;
+		if (newhealth == healthCounter && newmax == maxCounter) {
+			enemyHP = newhealth;
+			enemyMax = newmax;
+			clearInterval(loop);
+		} 
+	}, 1000 / Math.max(Math.abs(enemyHP - newhealth), Math.abs(enemyMax - newmax)));
+	r.style.setProperty("--currenteblood", Math.min((enemyHP / enemyMax * 100), 100) + "%");
+	r.style.setProperty("--neweblood", Math.min((newhealth / newmax * 100), 100) + "%");
+	enemyBloodBar.style.height = Math.min((enemyHP / enemyMax * 100), 100) + "%";
+	enemyBloodBar.style.animation = "";
+	setTimeout(function () {
+		enemyBloodBar.style.animation = "enemyBloodMove 1s both";
+	}, 1);
+}
+function updateGrid() {
+	for (let i = 0; i < 72; i++) {
+		let gridno = numToPos(i);
+		const gridelement = document.getElementById("grid-" + i);
+		if (grid[gridno[1]][gridno[0]] == "0") {
+			if (isNaN(Number(gridelement.innerHTML)) || gridelement.innerHTML == " ") {
+				gridelement.style.animation = "appear 1s reverse both";
+			} else {
+				gridelement.style.animation += ", appear 1s reverse both";
+			}
+			setTimeout(function () {
+				gridelement.className = "grid-none";
+				gridelement.style.animation = "";
+			}, 1000);
+		} else {
+			gridelement.innerHTML = grid[gridno[1]][gridno[0]];
+			gridelement.className = "grid-square"; 
+			if (isNaN(Number(grid[gridno[1]][gridno[0]])) || grid[gridno[1]][gridno[0]] == " ") {
+				gridelement.style.animation = "";
+			} else {
+				gridelement.style.animation = "poison 1s infinite alternate";
+			}
+		}
+	}
+}
+function posToNum(pos) {
+	return pos[0] + (pos[1] * grid[0].length);
+}
+function numToPos(num) {
+	return [num % grid[0].length, (num - (num % grid[0].length)) / grid[0].length];
+}
+function getOffset(id) {
+	const element = document.getElementById(id);
+	const rect = element.getBoundingClientRect();
+	const gameBoxRect = gameBox.getBoundingClientRect();
+	return {
+		left: rect.left - gameBoxRect.left,
+		top: rect.top - gameBoxRect.top
+	};
+}
+function updatePos(dir = -1) {
+	player.style.top = getOffset("grid-" + posToNum(position)).top + 1.23 + "px";
+	player.style.left = getOffset("grid-" + posToNum(position)).left + 1.23 + "px";
+	r.style.setProperty("--playerx", player.style.left);
+	r.style.setProperty("--playery", player.style.top);
+	r.style.setProperty("--dirx", player.style.left);
+	r.style.setProperty("--diry", player.style.top);
+	document.getElementById("grid-" + posToNum(position)).style.border = "";
+	document.getElementById("grid-" + posToNum(position)).style.opacity = 1;
+	if (dir == 0 && position[1] > 0) {
+		if (isNaN(Number(grid[position[1] - 1][position[0]])) || 
+		grid[position[1] - 1][position[0]] == " ") {
+			position[1]--;
+			r.style.setProperty("--diry", getOffset("grid-" + posToNum(position)).top + "px");
+		} else {
+			moves--;
+		}
+	} else if (dir == 1 && position[0] < grid[0].length - 1) {
+		if (isNaN(Number(grid[position[1]][position[0] + 1])) || 
+		grid[position[1]][position[0] + 1] == " ") {
+			position[0]++;
+			r.style.setProperty("--dirx", getOffset("grid-" + posToNum(position)).left + "px");
+		} else {
+			moves--;
+		}
+	} else if (dir == 2 && position[1] < grid.length - 1) {
+		if (isNaN(Number(grid[position[1] + 1][position[0]])) || 
+		grid[position[1] + 1][position[0]] == " ") {
+			position[1]++;
+			r.style.setProperty("--diry", getOffset("grid-" + posToNum(position)).top + "px");
+		} else {
+			moves--;
+		}
+	} else if (dir == 3 && position[0] > 0) {
+		if (isNaN(Number(grid[position[1]][position[0] - 1])) || 
+		grid[position[1]][position[0] - 1] == " ") {
+			position[0]--;
+			r.style.setProperty("--dirx", getOffset("grid-" + posToNum(position)).left + "px");
+		} else {
+			moves--;
+		}
+	}
+	if (dir != -1) {
+		moves++;
+		if (moves % 2 == 0) {
+			player.style.animation = "playerOtherMove 0.5s both";
+		} else {
+			player.style.animation = "playerMove 0.5s both";
+		}
+	}
+	document.getElementById("grid-" + posToNum(position)).style.border = "2px var(--borders) dotted";
+	document.getElementById("grid-" + posToNum(position)).style.opacity = 0.5;
+}
+function generateGrid() {
+	for (let i = 0; i < grid.length * grid[0].length; i++) {
+		grid[numToPos(i)[1]][numToPos(i)[0]] = "0";
+	}
+	var size = Math.floor(Math.random() * 10 + 7);
+	var dir = Math.floor(Math.random() * 4);
+	var curpos = [];
+	curpos[0] = position[0];
+	curpos[1] = position[1];
+	var rooms = [];
+	var dist = [];
+	var rng = 0;
+	var fulfill = [false, false];
+	grid[curpos[1]][curpos[0]] = " ";
+	while (size > 0) {
+		dir = Math.floor(Math.random() * 4);
+		if (dir == 0 && curpos[1] > 0) {
+			curpos[1]--;
+		} else if (dir == 1 && curpos[0] < grid[0].length - 1) {
+			curpos[0]++;
+		} else if (dir == 2 && curpos[1] < grid.length - 1) {
+			curpos[1]++;
+		} else if (dir == 3 && curpos[0] > 0) {
+			curpos[0]--;
+		}
+		if (grid[curpos[1]][curpos[0]] == "0") {
+			if (size > 1) {
+				rng = Math.floor(Math.random() * 20);
+				if (rng <= 9) {
+					grid[curpos[1]][curpos[0]] = " ";
+				} else if (rng <= 14) {
+					grid[curpos[1]][curpos[0]] = "!";
+					fulfill[0] = true;
+				} else if (rng <= 17) {
+					grid[curpos[1]][curpos[0]] = "$";
+					fulfill[1] = true;
+				} else {
+					grid[curpos[1]][curpos[0]] = "?";
+					fulfill[1] = true;
+				}
+				rooms.push(posToNum(curpos));
+			} else {
+				grid[curpos[1]][curpos[0]] = "^";
+			}
+			size--;
+		}
+	}
+	if (!fulfill[0]) {
+		dist = rooms[Math.floor(Math.random() * rooms.length)];
+		grid[numToPos(dist)[1]][numToPos(dist)[0]] = "!";
+	}
+	if (!fulfill[1]) {
+		dist = rooms[Math.floor(Math.random() * rooms.length)];
+		grid[numToPos(dist)[1]][numToPos(dist)[0]] = "?";
+	}
+	floor++;
+}
+function gridCheck() {
+	// 0 = overworld, 1 = battle, 2 = shop, 3 = event
+	if (grid[position[1]][position[0]] == "!") {
+		gamestate = 1;
+		if (floor <= 4) {
+			enemy = Math.floor(Math.random() * 1) + 1;
+		} else {
+			enemy = Math.floor(Math.random() * 1) + 1;
+		}
+		overworld.style.animation = "UIOut 2s both";
+		setTimeout(battleStart, 500);
+	} else if (grid[position[1]][position[0]] == "$") {
+		gamestate = 2;
+		overworld.style.animation = "UIOut 2s both";
+	} else if (grid[position[1]][position[0]] == "?") {
+		gamestate = 3;
+		overworld.style.animation = "UIOut 2s both";
+	} else if (grid[position[1]][position[0]] == "^") {
+		generateGrid();
+		updateGrid();
+	}
+}
+function battleStart() {
+	battleUI.style.animation = "UIOut2 2s both";
+	enemyHolder.innerHTML = "";
+	shuffleArray(cards);
+	deck.length = 0;
+	discard.length = 0;
+	if (enemy = 1) {
+		enemyHP = 0;
+		enemyMax = 10;
+		setTimeout(function () {
+			updateEnemyBlood(10);
+			setTimeout(draw, 300);
+			setTimeout(draw, 600);
+			setTimeout(draw, 900);
+		}, 500);
+		enemyHolder.innerHTML = '<div id="enemy1"></div>';
+		document.getElementById("enemy1").style.animation = "enemy1Idle 3s alternate infinite";
+	}
+	enemyDisplay();
+}
+function enemyDisplay() {
+	// turn 0 is the player's first turn, turn 0.5 is the enemy's, turn 1 is the player's second, etc. 
+	if (enemy == 1) {
+		enemyATK = turn % 3;
+		if (enemyATK == 0) {
+			attackInd.innerHTML = "□: ○ -5";
+		} else if (enemyATK == 1) {
+			attackInd.innerHTML = "□: //";
+		} else if (enemyATK == 2) {
+			attackInd.innerHTML = "□: ○ -2";
+		}
+	}
+}
+function draw() {
+	deck.push(cards[deck.length]);
+	newCard = document.createElement("div");
+	newCard.setAttribute("id", "card-" + deck.length);
+	newCard.setAttribute("class", "card");
+	cardHolder.appendChild(newCard);
+	newCard.style.animation = "draw 1s both";
+	newCard.style.right = ((deck.length - 1) * 2) + 1.5 + "em";
+	newCard.innerHTML = cardKey[deck[deck.length - 1]];
+	newCard.addEventListener("mouseenter", function () {
+		this.style["z-index"] = 100;
+		this.style["border-width"] = "2px";
+	});
+	newCard.addEventListener("mouseleave", function () {
+		this.style.removeProperty("z-index");
+		this.style["border-width"] = "1px";
+	});
+	newCard.addEventListener("click", function () {
+		if (turn % 1 == 0) {
+			turn += 0.25;
+			var num = Number(this.id.slice(5));
+			playerATK = deck[num - 1];
+			this.style.animation = "useCard 1s both";
+			deck.splice(num - 1, 1);
+			this.setAttribute("id", "card-using");
+			for (let i = num + 1; i < deck.length + 2; i++) {
+				const temp = document.getElementById("card-" + i);
+				temp.setAttribute("id", "card-" + (i - 1));
+				temp.style.animation = "shiftBack 1s both";
+				setTimeout(function () {
+					temp.style.right = ((i - 1) * 2) + 1.5 + "em";
+				}, 1000);
+			}
+			setTimeout(playerTurn, 2000);
+		}
+	});
+}
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+function playerTurn() {
+	if (playerATK == 0) {
+		updateBlood(Math.min(health + 2, max));
+	} else if (playerATK == 1) {
+		updateBlood(health - 1);
+	} else if (playerATK == 2) {
+		
+	}
+	setTimeout(enemyTurn, 2000);
+}
+function enemyTurn() {
+	turn += 0.25;
+	if (enemy == 1) {
+		if (enemyATK == 0) {
+			updateBlood(health - 5);
+		} else if (enemyATK == 2) {
+			updateBlood(health - 2);
+		}
+	}
+	setTimeout(function () {
+		turn += 0.5;
+		enemyDisplay();
+	}, 1000);
+}
+function revive() {
+	updateBlood(max);
+	updateEnemyBlood(enemyHP - max);
+}
+</script>
+</html>
+<!--
+the idea i have is a game where you plan your own death as part of the game's mechanics
+it's some kind of dungeon crawler 
+maybe you need the enemy to deplete your health in the right way to progress
+when you die you "bounce back"!! maybe dying in the right way counts for an attack or ->
+gives you massive boosts 
+dying in "the right way" could mean having to reduce your health exactly to 0 or some other goal
+otherwise if you die wrong you just die 
+dying has to be a mechanic ESSENTIAL to progression or to battling  
+i think i'll make this a card game
+
+implement the "health is your currency" system? 
+-->
