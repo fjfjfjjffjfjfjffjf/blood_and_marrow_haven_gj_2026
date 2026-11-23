@@ -14,8 +14,10 @@
 	--playery: 0px;
 	--dirx: 0px;
 	--diry: 0px;
-	-currenteblood: 100%;
-	neweblood: 100%;
+	--currenteblood: 100%;
+	--neweblood: 100%;
+	--currentshield: 0%;
+	--newshield: 0%;
 }
 html, body {
 	background-color: var(--bg);
@@ -61,7 +63,7 @@ html, body {
 	color: var(--bg);
 }
 #blood-meter {
-	border: 2px var(--borders) dotted;
+	border: 1px var(--borders) solid;
 	position: absolute;
 	top: 5%;
 	left: 90%;
@@ -87,6 +89,37 @@ html, body {
 	width: 100%;
 	height: 0%;
 	background-color: var(--blood);
+}
+#shield-meter-num {
+	position: absolute;
+	top: calc(5% - 1.5em);
+	left: 90%;
+	width: 5%;
+	height: 1em;
+	font-family: monospace;
+	font-size: 1em;
+	text-align: center;
+	color: var(--borders);
+}
+#shield-meter-bar {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 0%;
+}
+.shield {
+	background-image: radial-gradient(circle, var(--borders) 25%, transparent 25%), 
+	radial-gradient(circle, var(--borders) 25%, transparent 25%);
+	background-color: transparent;
+	background-position: 0 0, 0.3em 0.3em;
+	background-size: 0.6em 0.6em;
+	animation: shieldTranslateBG 1s linear infinite;
+}
+@keyframes shieldTranslateBG {
+	0%   {background-position: 0 0, 0.3em 0.3em;}
+	50%  {background-position: 0.3em 0.3em, 0.6em 0.6em;}
+	100% {background-position: 0.6em 0.6em, 0.9em 0.9em;}
 }
 .arrows {
 	
@@ -166,8 +199,21 @@ html, body {
 	color: var(--borders);
 	font-size: 1.5em;
 }
+.inventory-card {
+	width: 7.5em;
+	height: 10em;
+	border: 1px var(--borders) solid;
+	border-radius: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-family: monospace;
+	background-color: var(--bg);
+	color: var(--borders);
+	font-size: 1.5em;
+}
 #enemy-blood-meter {
-	border: 2px var(--borders) dotted;
+	border: 1px var(--borders) solid;
 	position: absolute;
 	top: 5em;
 	left: 1.5em;
@@ -177,7 +223,7 @@ html, body {
 }
 #enemy-blood-meter-num {
 	position: absolute;
-	top: 5.5em;
+	top: 6em;
 	left: 2px;
 	width: 1.5em;
 	height: calc(90% - 3.5em);
@@ -201,6 +247,11 @@ html, body {
 	width: 100%;
 	height: 50%;
 }
+.card:hover {
+	z-index: 100;
+	border-width: 2px;
+	transform: translate(0px, -2em);
+}
 #skip-button {
 	position: absolute;
 	bottom: 0.5em;
@@ -211,8 +262,73 @@ html, body {
 	border: 1px var(--borders) solid;
 	color: var(--borders);
 	font-family: monospace;
+	z-index: 101;
 }
 #skip-button:hover {
+	background-color: var(--borders);
+	color: var(--bg);
+}
+#inventory {
+	border: 1px var(--borders) solid;
+	background-color: var(--bg);
+	position: absolute;
+	top: calc(5% - 0.5em);
+	left: calc(5% - 0.5em);
+	width: 90%;
+	height: 90%;
+	padding: 0.5em;
+	flex-flow: row wrap;
+	overflow: auto;
+}
+#inventory-button {
+	border: 1px var(--borders) solid;
+	background-color: var(--bg);
+	position: absolute;
+	bottom: 0.25em;
+	left: 0.25em;
+	width: 2em;
+	height: 2em;
+	font-size: 1.5em;
+	font-family: monospace;
+	color: var(--borders);
+	padding: 0.25em;
+	border-radius: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#inventory-button:hover {
+	background-color: var(--borders);
+	color: var(--bg);
+}
+#shadow {
+	background-image: radial-gradient(circle, var(--bg) 40%, transparent 40%), 
+	radial-gradient(circle, var(--bg) 40%, transparent 40%);
+	background-color: transparent;
+	background-position: 0 0, 0.3em 0.3em;
+	background-size: 0.6em 0.6em;
+	animation: shieldTranslateBG 2s linear infinite;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+#inventory-back {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+	width: 1em;
+	height: 1em;
+	justify-content: center;
+	align-items: center;
+	border-color: transparent;
+	background-color: var(--bg);
+	color: var(--borders);
+	font-size: 1.5em;
+	font-family: monospace;
+}
+#inventory-back:hover {
 	background-color: var(--borders);
 	color: var(--bg);
 }
@@ -224,13 +340,17 @@ html, body {
 	from {height: var(--currentblood);}
 	to   {height: var(--newblood);}
 }
+@keyframes bloodOtherMove {
+	from {height: var(--currentblood);}
+	to   {height: var(--newblood);}
+}
 @keyframes playerMove {
 	from {top: var(--playery); left: var(--playerx);}
-	to   {top var(--diry); left: var(--dirx);}
+	to   {top: var(--diry); left: var(--dirx);}
 }
 @keyframes playerOtherMove {
 	from {top: var(--playery); left: var(--playerx);}
-	to   {top var(--diry); left: var(--dirx);}
+	to   {top: var(--diry); left: var(--dirx);}
 }
 @keyframes poison {
 	from {border: 2px var(--borders) dotted; background-color: var(--borders); color: var(--bg);}
@@ -253,17 +373,41 @@ html, body {
 	from {height: var(--currenteblood);}
 	to   {height: var(--neweblood);}
 }
+@keyframes enemyBloodOtherMove {
+	from {height: var(--currenteblood);}
+	to   {height: var(--neweblood);}
+}
+@keyframes shieldMove {
+	from {height: var(--currentshield);}
+	to   {height: var(--newshield);}
+}
+@keyframes shieldOtherMove {
+	from {height: var(--currentshield);}
+	to   {height: var(--newshield);}
+}
 @keyframes draw {
 	from {transform: translate(-60em, 0px);}
 	to   {transform: translate(0em, 0px);}
 }
 @keyframes useCard {
-	from {transform: translate(0em, 0em);}
+	from {transform: translate(0em, -2em);}
 	to   {transform: translate(0em, -50em);}
 }
 @keyframes shiftBack {
 	from {transform: translate(0em, 0em);}
 	to   {transform: translate(2em, 0em);}
+}
+@keyframes attackInd {
+	from {left: 0.5em;}
+	to   {left: calc(50% - var(--attackind));}
+}
+@keyframes attackIndBack {
+	from {left: calc(50% - var(--attackind));}
+	to   {left: 0.5em;}
+}
+@keyframes cardHolderBack {
+	from {transform: translate(0, 0);}
+	to   {transform: translate(0, 7.5em);}
 }
 </style>
 </head>
@@ -271,15 +415,17 @@ html, body {
 
 <div id="game-box">
 
-<div id="game-title-box" style="display: flex">
+<div id="game-title-box" style="display: flex;">
 <div id="game-title">Blood and Marrow</div>
 <button type="button"id="game-title-start"onclick="beginGame()">Begin!!</button>
 </div>
 
 <div id="game-ui" style="display: none; opacity: 0;">
 
-<div id="blood-meter"><div id="blood-meter-bar"></div></div>
+<div id="blood-meter"><div id="blood-meter-bar"></div>
+<div class="shield" id="shield-meter-bar"></div></div>
 <div id="blood-meter-num">0<br>/<br>10</div>
+<div id="shield-meter-num"></div>
 
 <div id="overworld">
 <div id="game-grid"></div>
@@ -292,9 +438,15 @@ html, body {
 <div id="enemy-blood-meter"><div id="enemy-blood-meter-bar"></div></div>
 <div id="enemy-blood-meter-num">0<br>/<br>10</div>
 
-<div id="card-holder"></div>
-<div id="skip-button">Skip</div>
+<div id="card-holder">
+<button type="button" id="skip-button">Skip</button>
 </div>
+</div>
+
+<button id="inventory-button" type="button">🂠</button>
+<div id="shadow" style="display: none;"></div>
+<div id="inventory" style="display: none;"></div>
+<button type="button" id="inventory-back" style="display: none;">⨯</button>
 
 </div>
 
@@ -308,6 +460,8 @@ const gameUI = document.getElementById("game-ui");
 const r = document.querySelector(":root");
 const bloodNum = document.getElementById("blood-meter-num");
 const bloodBar = document.getElementById("blood-meter-bar");
+const shieldNum = document.getElementById("shield-meter-num");
+const shieldBar = document.getElementById("shield-meter-bar");
 const enemyBloodNum = document.getElementById("enemy-blood-meter-num");
 const enemyBloodBar = document.getElementById("enemy-blood-meter-bar");
 const gameGrid = document.getElementById("game-grid");
@@ -317,14 +471,20 @@ const battleUI = document.getElementById("battle-ui");
 const enemyHolder = document.getElementById("enemy-holder");
 const attackInd = document.getElementById("attack-indicator");
 const cardHolder = document.getElementById("card-holder");
+const inventory = document.getElementById("inventory");
 
+const enemyNames = [
+	"○",
+	"⍚"
+]
 const cardKey = [
 	"○ +2",
-	"○ -1",
+	"○ -1▻",
 	"○ +3∇",
 	"",
 	""
 ];
+// -1 is skip, 0 is normal, 1 is pierce, 2 is poison, 3 is shield, 4+ is special 
 
 var health = 0;
 var max = 10;
@@ -343,6 +503,8 @@ var enemyHP = 0;
 var enemyMax = 0;
 var playerATK = 0;
 var shield = 0;
+var bloodMove = [false, false];
+var damage = 0;
 
 document.addEventListener("keydown", function (event) {
 	if (gamestate == 0) {
@@ -371,10 +533,34 @@ document.addEventListener("keydown", function (event) {
 	}
 });
 document.getElementById("skip-button").addEventListener("click", function () {
-	turn += 0.25;
-	playerATK = -1;
-	playerTurn();
+	if (turn % 1 == 0) {
+		turn += 0.25;
+		playerATK = -1;
+		cardHolder.style.animation = "cardHolderBack 1s both";
+		setTimeout(playerTurn, 1000);
+	}
 });
+document.getElementById("inventory-button").addEventListener("click", function () {
+	document.getElementById("shadow").style.display = "";
+	document.getElementById("inventory-back").style.display = "flex";
+	inventory.style.display = "flex";
+	for (i = 0; i < cards.length; i++) {
+		inventory.innerHTML += '<div class="inventory-card">' + cardKey[cards[i]] + '</div>';
+	}
+});
+document.getElementById("inventory-back").addEventListener("click", function () {
+	document.getElementById("shadow").style.display = "none";
+	document.getElementById("inventory-back").style.display = "none";
+	inventory.style.display = "none";
+	inventory.innerHTML = "";
+});
+function gridSquare(num) {
+	return document.getElementById("grid-" + num);
+}
+function changeGridValue(pos, value) {
+	grid[pos[1]][pos[0]] = value;
+	return value;
+}
 function beginGame() {
 	titleBox.style.animation = "appear 1s reverse both";
 	health = 0;
@@ -390,12 +576,13 @@ function beginGame() {
 	shield = 0;
 	enemyATK = 0;
 	cards.push(0);
+	cards.push(0);
+	cards.push(1);
 	cards.push(1);
 	cards.push(2);
 	for (let i = 0; i < (grid.length * grid[0].length); i++) {
 		gameGrid.innerHTML += '<div class="grid-none" id="grid-' + i + '"></div>';
-		grid[numToPos(i)[1]][numToPos(i)[0]] = "0";
-		document.getElementById("grid-" + i).innerHTML = "0";
+		changeGridValue(numToPos(i), "0");
 	}
 	setTimeout(function () {
 		updatePos();
@@ -404,12 +591,15 @@ function beginGame() {
 		gameUI.style.animation = "appear 1s both";
 		setTimeout(function () {
 			updateBlood(10);
+			updateShield(0);
 		}, 1500);
 		setTimeout(function () {
+			gameGrid.style.animation = "appear 1s both";
+			player.style.animation = "appear 1s both";
 			updatePos();
 			generateGrid();
 			updateGrid();
-		}, 3500);
+		}, 2500);
 	}, 1000);
 }
 
@@ -437,47 +627,101 @@ function updateBlood(newhealth = health, newmax = max) {
 	r.style.setProperty("--currentblood", Math.min((health / max * 100), 100) + "%");
 	r.style.setProperty("--newblood", Math.min((newhealth / newmax * 100), 100) + "%");
 	bloodBar.style.height = Math.min((health / max * 100), 100) + "%";
-	bloodBar.style.animation = "";
-	setTimeout(function () {
+	if (bloodMove[0]) {
 		bloodBar.style.animation = "bloodMove 1s both";
-	}, 1);
+		bloodMove[0] = false;
+	} else {
+		bloodBar.style.animation = "bloodOtherMove 1s both";
+		bloodMove[0] = true;
+	}
 	if (newhealth == 0) {
 		setTimeout(revive, 1000);
 	}
 }
-function updateEnemyBlood(newhealth = enemyHP, newmax = enemyMax) {
+function updateEnemyBlood(newhealth = enemyHP, newmax = enemyMax, instant = false) {
 	let healthCounter = enemyHP;
 	let maxCounter = enemyMax;
-	let loop = setInterval(function () {
-		if (newhealth < healthCounter) {
-			healthCounter--;
-		} else if (newhealth > healthCounter) {
-			healthCounter++;
+	if (!instant) {
+		let loop = setInterval(function () {
+			if (newhealth < healthCounter) {
+				healthCounter--;
+			} else if (newhealth > healthCounter) {
+				healthCounter++;
+			}
+			if (newmax < maxCounter) {
+				maxCounter--;
+			} else if (newmax > maxCounter) {
+				maxCounter++;
+			}
+			enemyBloodNum.innerHTML = healthCounter + "<br>/<br>" + maxCounter;
+			if (newhealth == healthCounter && newmax == maxCounter) {
+				enemyHP = newhealth;
+				enemyMax = newmax;
+				clearInterval(loop);
+			}
+		}, 1000 / Math.max(Math.abs(enemyHP - newhealth), Math.abs(enemyMax - newmax)));
+		if (bloodMove[1]) {
+			enemyBloodBar.style.animation = "enemyBloodMove 1s both";
+			bloodMove[1] = false;
+		} else {
+			enemyBloodBar.style.animation = "enemyBloodOtherMove 1s both";
+			bloodMove[1] = true;
 		}
-		if (newmax < maxCounter) {
-			maxCounter--;
-		} else if (newmax > maxCounter) {
-			maxCounter++;
+	} else {
+		if (bloodMove[1]) {
+			enemyBloodBar.style.animation = "enemyBloodMove 0s both";
+			bloodMove[1] = false;
+		} else {
+			enemyBloodBar.style.animation = "enemyBloodOtherMove 0s both";
+			bloodMove[1] = true;
 		}
-		enemyBloodNum.innerHTML = healthCounter + "<br>/<br>" + maxCounter;
-		if (newhealth == healthCounter && newmax == maxCounter) {
-			enemyHP = newhealth;
-			enemyMax = newmax;
-			clearInterval(loop);
-		} 
-	}, 1000 / Math.max(Math.abs(enemyHP - newhealth), Math.abs(enemyMax - newmax)));
+	}
 	r.style.setProperty("--currenteblood", Math.min((enemyHP / enemyMax * 100), 100) + "%");
 	r.style.setProperty("--neweblood", Math.min((newhealth / newmax * 100), 100) + "%");
 	enemyBloodBar.style.height = Math.min((enemyHP / enemyMax * 100), 100) + "%";
-	enemyBloodBar.style.animation = "";
-	setTimeout(function () {
-		enemyBloodBar.style.animation = "enemyBloodMove 1s both";
-	}, 1);
+}
+function updateShield(newhealth = shield, instant = false) {
+	let healthCounter = shield;
+	if (!instant) {
+		let loop = setInterval(function () {
+			if (newhealth < healthCounter) {
+				healthCounter--;
+			} else if (newhealth > healthCounter) {
+				healthCounter++;
+			}
+			shieldNum.innerHTML = healthCounter;
+			if (healthCounter == 0) {
+				shieldNum.innerHTML = "";
+			}
+			if (newhealth == healthCounter) {
+				shield = newhealth;
+				clearInterval(loop);
+			}
+		}, 1000 / Math.abs(shield - newhealth));
+		if (bloodMove[2]) {
+			shieldBar.style.animation = "shieldTranslateBG 1s linear infinite, shieldMove 1s both";
+			bloodMove[2] = false;
+		} else {
+			shieldBar.style.animation = "shieldTranslateBG 1s linear infinite, shieldOtherMove 1s both";
+			bloodMove[2] = true;
+		}
+	} else {
+		if (bloodMove[2]) {
+			shieldBar.style.animation = "shieldTranslateBG 1s linear infinite, shieldMove 0s both";
+			bloodMove[2] = false;
+		} else {
+			shieldBar.style.animation = "shieldTranslateBG 1s linear infinite, shieldOtherMove 0s both";
+			bloodMove[2] = true;
+		}
+	}
+	r.style.setProperty("--currentshield", Math.min((shield / max * 100), 100) + "%");
+	r.style.setProperty("--newshield", Math.min((newhealth / max * 100), 100) + "%");
+	shieldBar.style.height = Math.min((shield / max * 100), 100) + "%";
 }
 function updateGrid() {
 	for (let i = 0; i < 72; i++) {
 		let gridno = numToPos(i);
-		const gridelement = document.getElementById("grid-" + i);
+		const gridelement = gridSquare(i);
 		if (grid[gridno[1]][gridno[0]] == "0") {
 			if (isNaN(Number(gridelement.innerHTML)) || gridelement.innerHTML == " ") {
 				gridelement.style.animation = "appear 1s reverse both";
@@ -494,7 +738,7 @@ function updateGrid() {
 			if (isNaN(Number(grid[gridno[1]][gridno[0]])) || grid[gridno[1]][gridno[0]] == " ") {
 				gridelement.style.animation = "";
 			} else {
-				gridelement.style.animation = "poison 1s infinite alternate";
+				gridelement.style.animation = "poison 0.5s infinite alternate";
 			}
 		}
 	}
@@ -515,19 +759,15 @@ function getOffset(id) {
 	};
 }
 function updatePos(dir = -1) {
-	player.style.top = getOffset("grid-" + posToNum(position)).top + 1.23 + "px";
-	player.style.left = getOffset("grid-" + posToNum(position)).left + 1.23 + "px";
+	player.style.top = "calc(" + getOffset("grid-" + posToNum(position)).top + "px + 0.13em - 1px)";
+	player.style.left = "calc(" + getOffset("grid-" + posToNum(position)).left + "px + 0.13em - 1px)";
 	r.style.setProperty("--playerx", player.style.left);
 	r.style.setProperty("--playery", player.style.top);
-	r.style.setProperty("--dirx", player.style.left);
-	r.style.setProperty("--diry", player.style.top);
-	document.getElementById("grid-" + posToNum(position)).style.border = "";
-	document.getElementById("grid-" + posToNum(position)).style.opacity = 1;
+	gridSquare(posToNum(position)).style.border = "";
 	if (dir == 0 && position[1] > 0) {
 		if (isNaN(Number(grid[position[1] - 1][position[0]])) || 
 		grid[position[1] - 1][position[0]] == " ") {
 			position[1]--;
-			r.style.setProperty("--diry", getOffset("grid-" + posToNum(position)).top + "px");
 		} else {
 			moves--;
 		}
@@ -535,7 +775,6 @@ function updatePos(dir = -1) {
 		if (isNaN(Number(grid[position[1]][position[0] + 1])) || 
 		grid[position[1]][position[0] + 1] == " ") {
 			position[0]++;
-			r.style.setProperty("--dirx", getOffset("grid-" + posToNum(position)).left + "px");
 		} else {
 			moves--;
 		}
@@ -543,7 +782,6 @@ function updatePos(dir = -1) {
 		if (isNaN(Number(grid[position[1] + 1][position[0]])) || 
 		grid[position[1] + 1][position[0]] == " ") {
 			position[1]++;
-			r.style.setProperty("--diry", getOffset("grid-" + posToNum(position)).top + "px");
 		} else {
 			moves--;
 		}
@@ -551,21 +789,23 @@ function updatePos(dir = -1) {
 		if (isNaN(Number(grid[position[1]][position[0] - 1])) || 
 		grid[position[1]][position[0] - 1] == " ") {
 			position[0]--;
-			r.style.setProperty("--dirx", getOffset("grid-" + posToNum(position)).left + "px");
 		} else {
 			moves--;
 		}
 	}
 	if (dir != -1) {
 		moves++;
+		r.style.setProperty("--dirx", 
+			"calc(" + getOffset("grid-" + posToNum(position)).left + "px + 0.13em - 1px)");
+		r.style.setProperty("--diry", 
+			"calc(" + getOffset("grid-" + posToNum(position)).top + "px + 0.13em - 1px)");
 		if (moves % 2 == 0) {
 			player.style.animation = "playerOtherMove 0.5s both";
 		} else {
 			player.style.animation = "playerMove 0.5s both";
 		}
 	}
-	document.getElementById("grid-" + posToNum(position)).style.border = "2px var(--borders) dotted";
-	document.getElementById("grid-" + posToNum(position)).style.opacity = 0.5;
+	gridSquare(posToNum(position)).style.border = "4px var(--borders) dotted";
 }
 function generateGrid() {
 	for (let i = 0; i < grid.length * grid[0].length; i++) {
@@ -579,7 +819,7 @@ function generateGrid() {
 	var rooms = [];
 	var dist = [];
 	var rng = 0;
-	var fulfill = [false, false];
+	var fulfill = [0, 0];
 	grid[curpos[1]][curpos[0]] = " ";
 	while (size > 0) {
 		dir = Math.floor(Math.random() * 4);
@@ -599,13 +839,13 @@ function generateGrid() {
 					grid[curpos[1]][curpos[0]] = " ";
 				} else if (rng <= 14) {
 					grid[curpos[1]][curpos[0]] = "!";
-					fulfill[0] = true;
-				} else if (rng <= 17) {
+					fulfill[0]++;
+				} else if (rng <= 17 && fulfill[1] < 3) {
 					grid[curpos[1]][curpos[0]] = "$";
-					fulfill[1] = true;
-				} else {
+					fulfill[1]++;
+				} else if (fulfill[1] < 3) {
 					grid[curpos[1]][curpos[0]] = "?";
-					fulfill[1] = true;
+					fulfill[1]++;
 				}
 				rooms.push(posToNum(curpos));
 			} else {
@@ -614,11 +854,11 @@ function generateGrid() {
 			size--;
 		}
 	}
-	if (!fulfill[0]) {
+	if (fulfill[0] == 0) {
 		dist = rooms[Math.floor(Math.random() * rooms.length)];
 		grid[numToPos(dist)[1]][numToPos(dist)[0]] = "!";
 	}
-	if (!fulfill[1]) {
+	if (!fulfill[1] == 0) {
 		dist = rooms[Math.floor(Math.random() * rooms.length)];
 		grid[numToPos(dist)[1]][numToPos(dist)[0]] = "?";
 	}
@@ -635,6 +875,10 @@ function gridCheck() {
 		}
 		overworld.style.animation = "UIOut 2s both";
 		setTimeout(battleStart, 500);
+		setTimeout(function () {
+			overworld.style.animation = "";
+			overworld.style.transform = "translate(-30em, 0)";
+		}, 2000);
 	} else if (grid[position[1]][position[0]] == "$") {
 		gamestate = 2;
 		overworld.style.animation = "UIOut 2s both";
@@ -648,62 +892,66 @@ function gridCheck() {
 }
 function battleStart() {
 	battleUI.style.animation = "UIOut2 2s both";
+	setTimeout(function () {
+		battleUI.style.animation = "";
+		battleUI.style.transform = "translate(0, 0)";
+	}, 2000);
 	enemyHolder.innerHTML = "";
 	shuffleArray(cards);
 	deck.length = 0;
 	discard.length = 0;
+	damage = 0;
+	shield = 0;
+	updateShield();
+	updateBlood();
 	if (enemy = 1) {
 		enemyHP = 0;
 		enemyMax = 10;
-		setTimeout(function () {
-			updateEnemyBlood(10);
+		enemyHolder.innerHTML = '<div id="enemy1"></div>';
+		document.getElementById("enemy1").style.animation = "enemy1Idle 3s alternate infinite";
+	}
+	setTimeout(function () {
+			updateEnemyBlood(0, enemyMax, true);
+			updateEnemyBlood(enemyMax, enemyMax);
 			setTimeout(draw, 300);
 			setTimeout(draw, 600);
 			setTimeout(draw, 900);
 		}, 500);
-		enemyHolder.innerHTML = '<div id="enemy1"></div>';
-		document.getElementById("enemy1").style.animation = "enemy1Idle 3s alternate infinite";
-	}
 	enemyDisplay();
 }
 function enemyDisplay() {
 	// turn 0 is the player's first turn, turn 0.5 is the enemy's, turn 1 is the player's second, etc. 
 	if (enemy == 1) {
-		enemyATK = turn % 3;
+		enemyATK = Math.ceil(turn) % 3;
 		if (enemyATK == 0) {
-			attackInd.innerHTML = "□: ○ -5";
+			attackInd.innerHTML = "⍚: ○ -5";
 		} else if (enemyATK == 1) {
-			attackInd.innerHTML = "□: //";
+			attackInd.innerHTML = "⍚: //";
 		} else if (enemyATK == 2) {
-			attackInd.innerHTML = "□: ○ -2";
+			attackInd.innerHTML = "⍚: ○ -2";
 		}
 	}
 }
-function draw() {
-	deck.push(cards[deck.length]);
-	newCard = document.createElement("div");
+function draw() { 
+	deck.push(cards[deck.length + discard.length]);
+	newCard = document.createElement("button");
 	newCard.setAttribute("id", "card-" + deck.length);
 	newCard.setAttribute("class", "card");
+	newCard.setAttribute("type", "button");
 	cardHolder.appendChild(newCard);
 	newCard.style.animation = "draw 1s both";
 	newCard.style.right = ((deck.length - 1) * 2) + 1.5 + "em";
 	newCard.innerHTML = cardKey[deck[deck.length - 1]];
-	newCard.addEventListener("mouseenter", function () {
-		this.style["z-index"] = 100;
-		this.style["border-width"] = "2px";
-	});
-	newCard.addEventListener("mouseleave", function () {
-		this.style.removeProperty("z-index");
-		this.style["border-width"] = "1px";
-	});
+	setTimeout(function (card) {card.style.removeProperty("animation");}, 1000, newCard);
 	newCard.addEventListener("click", function () {
 		if (turn % 1 == 0) {
 			turn += 0.25;
 			var num = Number(this.id.slice(5));
 			playerATK = deck[num - 1];
 			this.style.animation = "useCard 1s both";
-			deck.splice(num - 1, 1);
+			discard.push(deck.splice(num - 1, 1)[0]);
 			this.setAttribute("id", "card-using");
+			cardHolder.style.animation = "cardHolderBack 1s both";
 			for (let i = num + 1; i < deck.length + 2; i++) {
 				const temp = document.getElementById("card-" + i);
 				temp.setAttribute("id", "card-" + (i - 1));
@@ -712,7 +960,10 @@ function draw() {
 					temp.style.right = ((i - 1) * 2) + 1.5 + "em";
 				}, 1000);
 			}
-			setTimeout(playerTurn, 2000);
+			setTimeout(function () {
+				document.getElementById("card-using").remove();
+				playerTurn();
+			}, 1000);
 		}
 	});
 }
@@ -730,32 +981,95 @@ function playerTurn() {
 	} else if (playerATK == 1) {
 		updateBlood(health - 1);
 	} else if (playerATK == 2) {
-		shield += 3;
+		updateShield(Math.min(shield + 3, max));
 	}
+	cardHolder.style.transform = "translate(0, 7.5em)";
+	cardHolder.style.animation = "";
+	setTimeout(function () {
+		r.style.setProperty("--attackind", (attackInd.offsetWidth / 2) + "px");
+		attackInd.style.animation = "attackInd 1s both";
+	}, 1000);
 	setTimeout(enemyTurn, 2000);
 }
 function enemyTurn() {
 	turn += 0.25;
 	if (enemy == 1) {
-		var damage;
 		if (enemyATK == 0) {
-			damage = 5;
+			damage += 5;
 		} else if (enemyATK == 2) {
-			damage = 2;
+			damage += 2;
 		}
-		shield -= damage;
-		damage = Math.max(Math.abs(shield), damage);
-		shield = Math.max(shield, 0);
+		damage -= shield;
+		let newshield = Math.max(0, damage * -1);
+		damage = Math.max(0, damage);
+		updateShield(newshield);
 		updateBlood(health - damage);
+		damage = 0;
 	}
 	setTimeout(function () {
-		turn += 0.5;
+		attackInd.style.animation = "attackIndBack 1s both";
+		turn += 0.25;
+		if (deck.length + discard.length < cards.length && deck.length < 7) {
+			draw();
+		} else if (deck.length == 0) {
+			shuffleCards();
+			setTimeout(draw, 300);
+			setTimeout(draw, 600);
+			setTimeout(draw, 900);
+		}
 		enemyDisplay();
+		cardHolder.style.animation = "cardHolderBack 1s reverse both";
+		setTimeout(turnLoop, 1000);
 	}, 1000);
+}
+function turnLoop() {
+	turn += 0.25;
+	cardHolder.style.animation = "";
+	cardHolder.style.transform = "";
+	if (enemyHP <= 0) {
+		battleEnd();
+	}
+}
+function battleEnd() {
+	turn = 0;
+	battleUI.style.animation = "UIOut2 2s reverse both";
+	battleUI.style.transform = "";
+	enemy = 0;
+	updateShield(0);
+	grid[position[1]][position[0]] = " ";
+	updateGrid();
+}
+function returnToOverworld() {
+	overworld.style.animation = "UIOut 2s reverse both";
+	overworld.style.transform = "";
+	setTimeout(function () {
+		gamestate = 0;
+		battleUI.style.animation = "";
+		overworld.style.animation = "";
+		enemyBloodBar.style.animation = "";
+		enemyHolder.innerHTML = "";
+		for (i = 0; i < deck.length; i++) {
+			document.getElementById("card-" + (i + 1)).remove();
+			}
+		}, 2000);
+	grid[position[1]][position[0]] = " ";
+	updateGrid();
 }
 function revive() {
 	updateBlood(max);
 	updateEnemyBlood(enemyHP - max);
+}
+function shuffleCards() {
+	discard.length = 0;
+	shuffleArray(cards);
+}
+function processMove(move) {
+	// -1 is skip, 0 is normal, 1 is pierce, 2 is poison, 3 is shield, 4 is special
+	return {sender: enemyNames.indexOf(move[0]), reciever: enemyNames.indexOf(move[2]), 
+	num: parseInt(move.slice(3)), 
+	type: (move[move.length - 1] == "/") ? -1 : ((move[move.length - 1] == "▻") ? 1 : 
+	((move[move.length - 1] == "◌") ? 2 : ((move[move.length - 1] == "∇") ? 3 : 
+	((isNaN(Number(move[move.length - 1]))) ? 4 : 0))))};
 }
 </script>
 </html>
