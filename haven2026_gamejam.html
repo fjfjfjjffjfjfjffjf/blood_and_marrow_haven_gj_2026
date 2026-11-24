@@ -200,17 +200,18 @@ html, body {
 	font-size: 1.5em;
 }
 .inventory-card {
-	width: 7.5em;
-	height: 10em;
+	width: 5em;
+	height: 6.66em;
 	border: 1px var(--borders) solid;
-	border-radius: 1em;
+	border-radius: 0.66em;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	font-family: monospace;
 	background-color: var(--bg);
 	color: var(--borders);
-	font-size: 1.5em;
+	font-size: 1em;
+	margin: 0.5em;
 }
 #enemy-blood-meter {
 	border: 1px var(--borders) solid;
@@ -275,10 +276,13 @@ html, body {
 	top: calc(5% - 0.5em);
 	left: calc(5% - 0.5em);
 	width: 90%;
-	height: 90%;
+	height: calc(90% - 3em);
 	padding: 0.5em;
 	flex-flow: row wrap;
 	overflow: auto;
+	justify-content: space-around;
+	align-items: flex-start;
+	padding-top: 3em;
 }
 #inventory-button {
 	border: 1px var(--borders) solid;
@@ -314,21 +318,39 @@ html, body {
 	width: 100%;
 	height: 100%;
 }
-#inventory-back {
-	position: absolute;
-	top: 5%;
-	right: 5%;
-	width: 1em;
-	height: 1em;
+.inventory-switch {
 	justify-content: center;
 	align-items: center;
-	border-color: transparent;
 	background-color: var(--bg);
 	color: var(--borders);
 	font-size: 1.5em;
 	font-family: monospace;
+	position: absolute;
 }
-#inventory-back:hover {
+#inventory-back {
+	top: 5%;
+	right: 5%;
+	width: 1em;
+	height: 1em;
+	border: 1px var(--borders) solid;
+}
+#inventory-showcards {
+	border-color: var(--borders);
+	border-width: 2px;
+	width: 2em;
+	height: 2em;
+	top: 5%;
+	left: calc(50% - 2.5em);
+}
+#inventory-discard {
+	border-color: var(--borders);
+	border-width: 2px;
+	width: 2em;
+	height: 2em;
+	top: 5%;
+	right: calc(50% - 2.5em);
+}
+.inventory-switch:hover {
 	background-color: var(--borders);
 	color: var(--bg);
 }
@@ -439,14 +461,16 @@ html, body {
 <div id="enemy-blood-meter-num">0<br>/<br>10</div>
 
 <div id="card-holder">
-<button type="button" id="skip-button">Skip</button>
+<button type="button" id="skip-button">//</button>
 </div>
 </div>
 
 <button id="inventory-button" type="button">🂠</button>
 <div id="shadow" style="display: none;"></div>
 <div id="inventory" style="display: none;"></div>
-<button type="button" id="inventory-back" style="display: none;">⨯</button>
+<button type="button" id="inventory-back" class="inventory-switch" style="display: none;">⨯</button>
+<button type="button" id="inventory-showcards" class="inventory-switch" style="display: none; border-style: solid;">🂠</button>
+<button type="button" id="inventory-discard" class="inventory-switch" style="display: none; border-style: dotted;">🗑</button>
 
 </div>
 
@@ -492,7 +516,8 @@ var moves = 0;
 var gamestate = 0;
 var enemy = 0;
 var floor = 0;
-const cards = [];
+const showcards = [];
+var cards = [];
 const grid = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), 
 			  new Array(8), new Array(8), new Array(8)];
 const position = [0, 0];
@@ -505,6 +530,7 @@ var playerATK = 0;
 var shield = 0;
 var bloodMove = [false, false];
 var damage = 0;
+var poison = 0;
 
 document.addEventListener("keydown", function (event) {
 	if (gamestate == 0) {
@@ -544,13 +570,50 @@ document.getElementById("inventory-button").addEventListener("click", function (
 	document.getElementById("shadow").style.display = "";
 	document.getElementById("inventory-back").style.display = "flex";
 	inventory.style.display = "flex";
-	for (i = 0; i < cards.length; i++) {
-		inventory.innerHTML += '<div class="inventory-card">' + cardKey[cards[i]] + '</div>';
+	if (gamestate == 1) {
+		document.getElementById("inventory-showcards").style.display = "flex";
+		document.getElementById("inventory-discard").style.display = "flex";
+		if (document.getElementById("inventory-showcards").style["border-style"] == "solid") {
+			for (i = 0; i < showcards.length; i++) {
+				inventory.innerHTML += '<button type="button" class="inventory-card">' + 
+				moveToString(showcards[i]) + '</button>';
+			} 
+		} else {
+			for (i = 0; i < discard.length; i++) {
+				inventory.innerHTML += '<button type="button" class="inventory-card">' + 
+				moveToString(discard[i]) + '</button>';
+			} 
+		}
+	} else {
+		for (i = 0; i < showcards.length; i++) {
+			inventory.innerHTML += '<button type="button" class="inventory-card">' + 
+			moveToString(showcards[i]) + '</button>';
+		}
 	}
+});
+document.getElementById("inventory-showcards").addEventListener("click", function () { 
+	inventory.innerHTML = "";
+	for (i = 0; i < showcards.length; i++) {
+		inventory.innerHTML += '<button type="button" class="inventory-card">' + 
+		moveToString(showcards[i]) + '</button>';
+	}
+	document.getElementById("inventory-showcards").style["border-style"] = "solid";
+	document.getElementById("inventory-discard").style["border-style"] = "dotted";
+});
+document.getElementById("inventory-discard").addEventListener("click", function () { 
+	inventory.innerHTML = "";
+	for (i = 0; i < discard.length; i++) {
+		inventory.innerHTML += '<button type="button" class="inventory-card">' + 
+		moveToString(discard[i]) + '</button>';
+	}
+	document.getElementById("inventory-showcards").style["border-style"] = "dotted";
+	document.getElementById("inventory-discard").style["border-style"] = "solid";
 });
 document.getElementById("inventory-back").addEventListener("click", function () {
 	document.getElementById("shadow").style.display = "none";
 	document.getElementById("inventory-back").style.display = "none";
+	document.getElementById("inventory-showcards").style.display = "none";
+	document.getElementById("inventory-discard").style.display = "none";
 	inventory.style.display = "none";
 	inventory.innerHTML = "";
 });
@@ -571,15 +634,16 @@ function beginGame() {
 	floor = 0;
 	enemy = 0;
 	gamestate = 0;
-	cards.length = 0;
+	showcards.length = 0;
 	turn = 0;
 	shield = 0;
+	poison = 0;
 	enemyATK = 0;
-	cards.push(0);
-	cards.push(0);
-	cards.push(1);
-	cards.push(1);
-	cards.push(2);
+	showcards.push([0, 2, true]);
+	showcards.push([0, 2, true]);
+	showcards.push([1, -1, true]);
+	showcards.push([1, -1, true]);
+	showcards.push([3, 3, true]);
 	for (let i = 0; i < (grid.length * grid[0].length); i++) {
 		gameGrid.innerHTML += '<div class="grid-none" id="grid-' + i + '"></div>';
 		changeGridValue(numToPos(i), "0");
@@ -602,7 +666,6 @@ function beginGame() {
 		}, 2500);
 	}, 1000);
 }
-
 function updateBlood(newhealth = health, newmax = max) {
 	let healthCounter = health;
 	let maxCounter = max;
@@ -624,9 +687,9 @@ function updateBlood(newhealth = health, newmax = max) {
 			clearInterval(loop);
 		} 
 	}, 1000 / Math.max(Math.abs(health - newhealth), Math.abs(max - newmax)));
-	r.style.setProperty("--currentblood", Math.min((health / max * 100), 100) + "%");
-	r.style.setProperty("--newblood", Math.min((newhealth / newmax * 100), 100) + "%");
-	bloodBar.style.height = Math.min((health / max * 100), 100) + "%";
+	r.style.setProperty("--currentblood", Math.max(Math.min((health / max * 100), 100), 0) + "%");
+	r.style.setProperty("--newblood", Math.max(Math.min((newhealth / newmax * 100), 100), 0) + "%");
+	bloodBar.style.height = Math.max(Math.min((health / max * 100), 100), 0) + "%";
 	if (bloodMove[0]) {
 		bloodBar.style.animation = "bloodMove 1s both";
 		bloodMove[0] = false;
@@ -676,9 +739,9 @@ function updateEnemyBlood(newhealth = enemyHP, newmax = enemyMax, instant = fals
 			bloodMove[1] = true;
 		}
 	}
-	r.style.setProperty("--currenteblood", Math.min((enemyHP / enemyMax * 100), 100) + "%");
-	r.style.setProperty("--neweblood", Math.min((newhealth / newmax * 100), 100) + "%");
-	enemyBloodBar.style.height = Math.min((enemyHP / enemyMax * 100), 100) + "%";
+	r.style.setProperty("--currenteblood", Math.max(Math.min((enemyHP / enemyMax * 100), 100), 0) + "%");
+	r.style.setProperty("--neweblood", Math.max(Math.min((newhealth / newmax * 100), 100), 0) + "%");
+	enemyBloodBar.style.height = Math.max(Math.min((enemyHP / enemyMax * 100), 100), 0) + "%";
 }
 function updateShield(newhealth = shield, instant = false) {
 	let healthCounter = shield;
@@ -714,20 +777,18 @@ function updateShield(newhealth = shield, instant = false) {
 			bloodMove[2] = true;
 		}
 	}
-	r.style.setProperty("--currentshield", Math.min((shield / max * 100), 100) + "%");
-	r.style.setProperty("--newshield", Math.min((newhealth / max * 100), 100) + "%");
-	shieldBar.style.height = Math.min((shield / max * 100), 100) + "%";
+	r.style.setProperty("--currentshield", Math.max(Math.min((shield / max * 100), 100), 0) + "%");
+	r.style.setProperty("--newshield", Math.max(Math.min((newhealth / max * 100), 100), 0) + "%");
+	shieldBar.style.height = Math.max(Math.min((shield / max * 100), 100), 0) + "%";
 }
 function updateGrid() {
 	for (let i = 0; i < 72; i++) {
 		let gridno = numToPos(i);
 		const gridelement = gridSquare(i);
 		if (grid[gridno[1]][gridno[0]] == "0") {
-			if (isNaN(Number(gridelement.innerHTML)) || gridelement.innerHTML == " ") {
-				gridelement.style.animation = "appear 1s reverse both";
-			} else {
-				gridelement.style.animation += ", appear 1s reverse both";
-			}
+			gridelement.style.animation +=
+			(isNaN(Number(gridelement.innerHTML)) || gridelement.innerHTML == " ") ? 
+			"appear 1s reverse both" : ", appear 1s reverse both";
 			setTimeout(function () {
 				gridelement.className = "grid-none";
 				gridelement.style.animation = "";
@@ -835,17 +896,17 @@ function generateGrid() {
 		if (grid[curpos[1]][curpos[0]] == "0") {
 			if (size > 1) {
 				rng = Math.floor(Math.random() * 20);
-				if (rng <= 9) {
-					grid[curpos[1]][curpos[0]] = " ";
-				} else if (rng <= 14) {
+				if (rng <= 14 && rng > 9 && fulfill[0] < 4) {
 					grid[curpos[1]][curpos[0]] = "!";
 					fulfill[0]++;
 				} else if (rng <= 17 && fulfill[1] < 3) {
 					grid[curpos[1]][curpos[0]] = "$";
 					fulfill[1]++;
-				} else if (fulfill[1] < 3) {
+				} else if (rng <= 19 && fulfill[1] < 3) {
 					grid[curpos[1]][curpos[0]] = "?";
 					fulfill[1]++;
+				} else {
+					grid[curpos[1]][curpos[0]] = " ";
 				}
 				rooms.push(posToNum(curpos));
 			} else {
@@ -897,11 +958,13 @@ function battleStart() {
 		battleUI.style.transform = "translate(0, 0)";
 	}, 2000);
 	enemyHolder.innerHTML = "";
+	cards = showcards.slice();
 	shuffleArray(cards);
 	deck.length = 0;
 	discard.length = 0;
 	damage = 0;
 	shield = 0;
+	poison = 0;
 	updateShield();
 	updateBlood();
 	if (enemy = 1) {
@@ -910,8 +973,8 @@ function battleStart() {
 		enemyHolder.innerHTML = '<div id="enemy1"></div>';
 		document.getElementById("enemy1").style.animation = "enemy1Idle 3s alternate infinite";
 	}
+	updateEnemyBlood(0, enemyMax, true);
 	setTimeout(function () {
-			updateEnemyBlood(0, enemyMax, true);
 			updateEnemyBlood(enemyMax, enemyMax);
 			setTimeout(draw, 300);
 			setTimeout(draw, 600);
@@ -941,7 +1004,7 @@ function draw() {
 	cardHolder.appendChild(newCard);
 	newCard.style.animation = "draw 1s both";
 	newCard.style.right = ((deck.length - 1) * 2) + 1.5 + "em";
-	newCard.innerHTML = cardKey[deck[deck.length - 1]];
+	newCard.innerHTML = moveToString(deck[deck.length - 1]);
 	setTimeout(function (card) {card.style.removeProperty("animation");}, 1000, newCard);
 	newCard.addEventListener("click", function () {
 		if (turn % 1 == 0) {
@@ -976,18 +1039,40 @@ function shuffleArray(array) {
     }
 }
 function playerTurn() {
-	if (playerATK == 0) {
-		updateBlood(Math.min(health + 2, max));
-	} else if (playerATK == 1) {
-		updateBlood(health - 1);
-	} else if (playerATK == 2) {
-		updateShield(Math.min(shield + 3, max));
+	switch (playerATK[0]) {
+		default: 
+			break;
+		case 0: 
+			if (playerATK[1] >= 0) {
+				updateBlood(Math.min(health + playerATK[1], max));
+			} else {
+				damage = playerATK[1] - shield;
+				let newshield = Math.max(0, damage * -1);
+				damage = Math.max(0, damage);
+				updateShield(newshield);
+				updateBlood(health - damage);
+				damage = 0;
+			}
+			break;
+		case 1:
+			updateBlood(health + playerATK[1]);
+			break;
+		case 2:
+			poison += playerATK[1];
+			break;
+		case 3:
+			updateShield(Math.min(shield + playerATK[1], max));
+			break;
 	}
 	cardHolder.style.transform = "translate(0, 7.5em)";
 	cardHolder.style.animation = "";
 	setTimeout(function () {
 		r.style.setProperty("--attackind", (attackInd.offsetWidth / 2) + "px");
 		attackInd.style.animation = "attackInd 1s both";
+		if (poison > 0) {
+			updateBlood(Math.min(health + 1, max));
+			poison--;
+		}
 	}, 1000);
 	setTimeout(enemyTurn, 2000);
 }
@@ -1012,7 +1097,8 @@ function enemyTurn() {
 		if (deck.length + discard.length < cards.length && deck.length < 7) {
 			draw();
 		} else if (deck.length == 0) {
-			shuffleCards();
+			discard.length = 0;
+			shuffleArray(cards);
 			setTimeout(draw, 300);
 			setTimeout(draw, 600);
 			setTimeout(draw, 900);
@@ -1036,8 +1122,10 @@ function battleEnd() {
 	battleUI.style.transform = "";
 	enemy = 0;
 	updateShield(0);
+	updateBlood(health, max + 2);
 	grid[position[1]][position[0]] = " ";
 	updateGrid();
+	returnToOverworld();
 }
 function returnToOverworld() {
 	overworld.style.animation = "UIOut 2s reverse both";
@@ -1046,7 +1134,6 @@ function returnToOverworld() {
 		gamestate = 0;
 		battleUI.style.animation = "";
 		overworld.style.animation = "";
-		enemyBloodBar.style.animation = "";
 		enemyHolder.innerHTML = "";
 		for (i = 0; i < deck.length; i++) {
 			document.getElementById("card-" + (i + 1)).remove();
@@ -1059,10 +1146,6 @@ function revive() {
 	updateBlood(max);
 	updateEnemyBlood(enemyHP - max);
 }
-function shuffleCards() {
-	discard.length = 0;
-	shuffleArray(cards);
-}
 function processMove(move) {
 	// -1 is skip, 0 is normal, 1 is pierce, 2 is poison, 3 is shield, 4 is special
 	return {sender: enemyNames.indexOf(move[0]), reciever: enemyNames.indexOf(move[2]), 
@@ -1070,6 +1153,17 @@ function processMove(move) {
 	type: (move[move.length - 1] == "/") ? -1 : ((move[move.length - 1] == "▻") ? 1 : 
 	((move[move.length - 1] == "◌") ? 2 : ((move[move.length - 1] == "∇") ? 3 : 
 	((isNaN(Number(move[move.length - 1]))) ? 4 : 0))))};
+}
+function moveToString(move) {
+	if (move[2]) {
+		return (move[0] == -1) ? "//" : 
+		("○" + ((move[1] >= 0) ? " +" : " ") + move[1] + ((move[0] == 1) ? "▻" : 
+		(move[0] == 2) ? "◌" : (move[0] == 3) ? "∇" : ""));
+	} else {
+		return (move[0] == -1) ? "//" : 
+		("◈" + ((move[1] >= 0) ? " +" : " ") + move[1] + ((move[0] == 1) ? "▻" : 
+		(move[0] == 2) ? "◌" : (move[0] == 3) ? "∇" : ""));
+	}
 }
 </script>
 </html>
